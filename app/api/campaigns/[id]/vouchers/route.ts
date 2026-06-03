@@ -11,13 +11,13 @@ export async function GET(request: Request, { params }: Params) {
       return NextResponse.json({ error: "Invalid campaign id" }, { status: 400 });
     }
     const { searchParams } = new URL(request.url);
-
+    //console.log('searchParams  >', searchParams);
     const limit = Math.min(Number(searchParams.get("limit") ?? 100), 500);
     const offset = Math.max(Number(searchParams.get("offset") ?? 0), 0);
     const result = await listVouchers(campaignId, limit, offset);
     console.log('result ---->', result);
     return NextResponse.json(result);
-    
+
   } catch (err) {
     console.error('error---->', err);
     return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(request: Request, { params }: Params) {
     console.error(err);
 
     const message = err instanceof Error ? err.message : "Failed to create vouchers";
-    const status = message === "Campaign nt found" ? 404 : 500;
+    const status = message === "Campaign not found" ? 404 : 500;
 
     return NextResponse.json({ error: message }, { status });
   }
