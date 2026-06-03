@@ -59,14 +59,13 @@ export default function VouchersModal({
               </span>
             </h3>
           </div>
-          <button
-            type="button"
+          <Button
+            label="✕"
+            variant="outline"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
             aria-label="Close modal"
-          >
-            ✕
-          </button>
+            className="h-10 w-10 shrink-0 p-0"
+          />
         </div>
 
         <Card

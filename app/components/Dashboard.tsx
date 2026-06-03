@@ -273,8 +273,8 @@ export default function Dashboard() {
                     const isSelected = selectedId === c.id;
                     return (
                       <li key={c.id}>
-                        <button
-                          type="button"
+                        <Button
+                          variant="unstyled"
                           onClick={() => {
                             setSelectedId(c.id);
                             setVouchersModalOpen(true);
@@ -302,7 +302,7 @@ export default function Dashboard() {
                             </span>
                             {c.valid_from} → {c.valid_to}
                           </p>
-                        </button>
+                        </Button>
                       </li>
                     );
                   })}

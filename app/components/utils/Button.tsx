@@ -1,13 +1,20 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "danger" | "ghost";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "danger"
+  | "ghost"
+  | "unstyled";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  label: string;
+  label?: string;
+  children?: ReactNode;
   variant?: ButtonVariant;
 }
 
-const variants: Record<ButtonVariant, string> = {
+const variants: Record<Exclude<ButtonVariant, "unstyled">, string> = {
   primary:
     "bg-indigo-600 text-white shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 focus-visible:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400",
   secondary:
@@ -20,21 +27,35 @@ const variants: Record<ButtonVariant, string> = {
     "text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-800",
 };
 
+const baseStyles =
+  "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+
 export default function Button({
   label,
+  children,
   variant = "primary",
   className = "",
   disabled,
+  type = "button",
   ...props
 }: ButtonProps) {
+  const content = children ?? label;
+
+  const variantClass =
+    variant === "unstyled" ? "" : variants[variant];
+
   return (
     <button
-      type="button"
+      type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={
+        variant === "unstyled"
+          ? `disabled:pointer-events-none disabled:opacity-50 ${className}`
+          : `${baseStyles} ${variantClass} ${className}`
+      }
       {...props}
     >
-      {label}
+      {content}
     </button>
   );
 }
