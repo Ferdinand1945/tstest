@@ -5,7 +5,7 @@ import type { Campaign, Voucher } from "@/lib/types";
 import Header from "./Header";
 import { CheckCircle, AlertCircle } from "@deemlol/next-icons";
 import VouchersModal from "./VouchersModal";
-import CampaignsSection from "./CampaignsSection";
+import CampaignsSection, { type CampaignFormState } from "./CampaignsSection";
 
 export default function Dashboard() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [messageType, setMessageType] = useState<"success" | "error">("success");
   const [batchCount, setBatchCount] = useState("100");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<CampaignFormState>({
     prefix: "DISCOUNT",
     amount: "10",
     currency: "EUR",
