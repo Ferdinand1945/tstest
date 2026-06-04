@@ -46,6 +46,7 @@ VoucherModel.init(
   {
     sequelize: getSequelize(),
     tableName: "vouchers",
+    modelName: "voucher",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: false,

@@ -1,6 +1,4 @@
-# Transiett — Voucher campaigns
-
-Simple TypeScript app (Next.js + PostgreSQL + Sequelize) to manage voucher campaigns and generate unique discount codes.
+# Transiett — Code test
 
 ## Setup
 
@@ -12,7 +10,7 @@ Simple TypeScript app (Next.js + PostgreSQL + Sequelize) to manage voucher campa
 cp .env.example .env.local
 ```
 
-3. Initialize schema:
+3. Initialize schema (runs `db_schema/init.sql`):
 
 ```bash
 npm run db:init
@@ -26,16 +24,34 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## API
+## Docker
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/campaigns` | List campaigns |
-| POST | `/api/campaigns` | Create campaign |
-| DELETE | `/api/campaigns/:id` | Delete campaign (cascades vouchers) |
-| GET | `/api/campaigns/:id/vouchers` | List vouchers (`limit`, `offset`) |
-| POST | `/api/campaigns/:id/vouchers` | Batch create `{ "count": N }` |
-| GET | `/api/campaigns/:id/vouchers/export` | Download CSV |
+Requires [Docker](https://docs.docker.com/get-docker/) and Docker Compose.
+
+```bash
+docker compose up --build
+```
+
+- **App:** http://localhost:3000
+- **Postgres:** `localhost:5432` (user/password: `postgres` / `postgres`, database: `transiett_db`)
+
+On first start, Postgres runs **`db_schema/init.sql`** automatically (schema + seed data). Init scripts only run on a **fresh volume**.
+
+| Service | Role |
+|---------|------|
+| `postgres` | PostgreSQL 16 + `init.sql` on first boot |
+| `app` | Next.js production server |
+
+Reset DB (re-run init.sql): `docker compose down -v && docker compose up --build`
+
+## Tests (Vitest + React Testing Library)
+
+```bash
+npm run test:run    # single run
+npm run test        # watch mode
+```
+
+E2E: `npx playwright test` (Playwright is installed separately).
 
 Requires PostgreSQL running and schema initialized:
 

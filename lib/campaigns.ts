@@ -1,9 +1,16 @@
 import { col, fn, Op } from "sequelize";
 import { generateUniqueCodes } from "./voucher-codes";
 import { CampaignModel, VoucherModel } from "./models";
-import type { Campaign, CreateCampaignInput, Voucher } from "./types";
+import type {
+  Campaign,
+  CreateCampaignInput,
+  CreateVouchersBatchResult,
+  Voucher,
+} from "./types";
 
 const INSERT_CHUNK = 5000;
+/** Max top-up rounds when DB rejects codes that collide with existing rows */
+const MAX_BATCH_ROUNDS = 50;
 
 export async function listCampaigns(): Promise<Campaign[]> {
   const rows = await CampaignModel.findAll({
@@ -11,7 +18,7 @@ export async function listCampaigns(): Promise<Campaign[]> {
       include: [[fn("COUNT", col("vouchers.id")), "voucher_count"]],
     },
     include: [{ model: VoucherModel, as: "vouchers", attributes: [] }],
-    group: ["CampaignModel.id"],
+    group: [col("campaign.id")],
     order: [["created_at", "DESC"]],
     subQuery: false,
   });
@@ -47,7 +54,7 @@ export async function getCampaign(id: number): Promise<Campaign | null> {
       include: [[fn("COUNT", col("vouchers.id")), "voucher_count"]],
     },
     include: [{ model: VoucherModel, as: "vouchers", attributes: [] }],
-    group: ["CampaignModel.id"],
+    group: [col("campaign.id")],
     subQuery: false,
   });
   return row ? toCampaign(row) : null;
@@ -74,23 +81,51 @@ export async function listVouchers(
 export async function createVouchersBatch(
   campaignId: number,
   count: number,
-): Promise<{ created: number }> {
+): Promise<CreateVouchersBatchResult> {
   const campaign = await getCampaign(campaignId);
   if (!campaign) throw new Error("Campaign not found");
 
-  const codes = generateUniqueCodes(campaign.prefix, count);
   let created = 0;
+  let rounds = 0;
 
+  while (created < count && rounds < MAX_BATCH_ROUNDS) {
+    rounds += 1;
+    const remaining = count - created;
+    const codes = generateUniqueCodes(campaign.prefix, remaining);
+    const inserted = await insertVoucherCodes(campaignId, codes);
+    created += inserted;
+
+    if (inserted === 0) {
+      throw new Error(
+        `Could not create more unique codes for prefix "${campaign.prefix}". ` +
+          `Created ${created} of ${count} requested (code space may be exhausted).`,
+      );
+    }
+  }
+
+  if (created < count) {
+    throw new Error(
+      `Created ${created} of ${count} requested vouchers after ${MAX_BATCH_ROUNDS} top-up rounds.`,
+    );
+  }
+
+  return { created, requested: count, complete: true };
+}
+
+async function insertVoucherCodes(
+  campaignId: number,
+  codes: string[],
+): Promise<number> {
+  let inserted = 0;
   for (let i = 0; i < codes.length; i += INSERT_CHUNK) {
     const chunk = codes.slice(i, i + INSERT_CHUNK);
-    const inserted = await VoucherModel.bulkCreate(
+    const rows = await VoucherModel.bulkCreate(
       chunk.map((code) => ({ campaign_id: campaignId, code })),
       { ignoreDuplicates: true },
     );
-    created += inserted.length;
+    inserted += rows.length;
   }
-
-  return { created };
+  return inserted;
 }
 
 export async function* streamVoucherCodes(

@@ -115,6 +115,7 @@ export default function CampaignsSection({
                   <li key={c.id}>
                     <Button
                       variant="unstyled"
+                      aria-label={`Campaign ${c.prefix}`}
                       onClick={() => onCampaignSelect(c.id)}
                       className={`group w-full rounded-xl border p-4 text-left transition-all duration-200 ${
                         isSelected

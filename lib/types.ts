@@ -23,3 +23,9 @@ export type CreateCampaignInput = {
   valid_from: string;
   valid_to: string;
 };
+
+export type CreateVouchersBatchResult = {
+  created: number;
+  requested: number;
+  complete: boolean;
+};

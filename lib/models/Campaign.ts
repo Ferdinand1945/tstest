@@ -56,6 +56,7 @@ CampaignModel.init(
   {
     sequelize: getSequelize(),
     tableName: "campaigns",
+    modelName: "campaign",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: false,

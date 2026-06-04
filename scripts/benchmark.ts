@@ -45,7 +45,10 @@ async function main() {
 
   console.log(`Generating ${COUNT.toLocaleString()} vouchers...`);
   const createStart = performance.now();
-  const { created } = await createVouchersBatch(campaign.id, COUNT);
+  const { created, requested, complete } = await createVouchersBatch(
+    campaign.id,
+    COUNT,
+  );
   const createMs = performance.now() - createStart;
   console.log(
     `Created ${created.toLocaleString()} vouchers in ${(createMs / 1000).toFixed(2)}s (${Math.round(created / (createMs / 1000)).toLocaleString()}/s)`,
@@ -62,7 +65,8 @@ async function main() {
 
   const totalMs = createMs + exportMs;
   console.log(`Total: ${(totalMs / 1000).toFixed(2)}s`);
-  const ok = created === COUNT && lineCount === COUNT + 1;
+  const ok =
+    complete && created === requested && created === COUNT && lineCount === COUNT + 1;
   console.log(ok ? "PASS" : "FAIL");
 
   console.log("Cleaning up benchmark campaign...");

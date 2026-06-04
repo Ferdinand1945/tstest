@@ -133,7 +133,16 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(data.error ?? "Batch create failed");
       await refreshCampaigns();
       await refreshVouchers(selectedId);
-      showMessage(`Generated ${data.created.toLocaleString()} voucher(s).`);
+      if (data.complete === false || data.created !== data.requested) {
+        showMessage(
+          `Created ${data.created.toLocaleString()} of ${data.requested.toLocaleString()} requested voucher(s).`,
+          "error",
+        );
+      } else {
+        showMessage(
+          `Generated ${data.created.toLocaleString()} voucher(s).`,
+        );
+      }
     } catch (err) {
       showMessage(err instanceof Error ? err.message : "Batch create failed", "error");
     } finally {
